@@ -1,0 +1,139 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description:
+  |
+  Creates a Cognito User Pool along with an AppClient. The AppClient will be permitted to use the OAuth client-credentials flow to obtain temporary
+  access token. This access token will be needed to authenticate against an API Gateway endpoint, which will use a Cognito_Authroizer for the authorization of the API.
+
+Parameters:
+  UserPoolName:
+    Description: The name of the user pool which will be created
+    Default: 'PetStoreApi'
+    Type: String
+  ApiGatewayEndpoint:
+    Description: The URL of the REST API endpoint.
+    Type: String
+    Default: 'https://{restapi_id}.execute-api.{region}.amazonaws.com/{stage_name}/'
+
+Resources:
+  # Creates the User Pool
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties: 
+      # AccountRecoverySetting: 
+      #   AccountRecoverySetting
+      # AdminCreateUserConfig: 
+      #   AdminCreateUserConfig
+      # AliasAttributes: 
+      #   - String
+      # AutoVerifiedAttributes: 
+      #   - String
+      # DeletionProtection: ACTIVE 
+      # DeviceConfiguration: 
+      #   DeviceConfiguration
+      # EmailConfiguration: 
+      #   EmailConfiguration
+      # EmailVerificationMessage: String
+      # EmailVerificationSubject: String
+      # EnabledMfas: 
+      #   - String
+      # LambdaConfig: 
+      #   LambdaConfig
+      # MfaConfiguration: String
+      # Policies: 
+      #   Policies
+      # Schema: 
+      #   - SchemaAttribute
+      # SmsAuthenticationMessage: String
+      # SmsConfiguration: 
+      #   SmsConfiguration
+      # SmsVerificationMessage: String
+      # UserAttributeUpdateSettings: 
+      #   UserAttributeUpdateSettings
+      # UsernameAttributes: 
+      #   - String
+      # UsernameConfiguration: 
+      #   UsernameConfiguration
+      # UserPoolAddOns: 
+      #   UserPoolAddOns
+      UserPoolName: !Ref UserPoolName
+      # UserPoolTags: Json
+      # VerificationMessageTemplate: 
+      #   VerificationMessageTemplate
+
+## UserPoolResource Server & Scope
+  ResourceServer:
+    Type: AWS::Cognito::UserPoolResourceServer
+    Properties: 
+      Identifier: !Ref ApiGatewayEndpoint
+      Name: !Ref UserPoolName
+      Scopes: 
+        -   ScopeDescription: Allows read operations
+            ScopeName: read
+        -   ScopeDescription: Allows write operations
+            ScopeName: write
+      UserPoolId: !Ref UserPool
+
+
+## Creates a new App Client for a tenant in the Cognito User Pool 
+  AppClient:
+    DependsOn: ResourceServer
+    Type: AWS::Cognito::UserPoolClient
+    Properties: 
+      AccessTokenValidity: 60 # in minutes (see 'TokenValidityUnits')
+      AllowedOAuthFlows: 
+        - client_credentials 
+      AllowedOAuthFlowsUserPoolClient: true #?
+      AllowedOAuthScopes: #todo: define custom scopes for read/write/admin permissions
+        - !Sub
+          - '${resourceServerIdentifier}/read' # read is the hardcoded name of the scope created for the ResourceServer
+          - resourceServerIdentifier: !Ref ResourceServer
+        - !Sub
+          - '${resourceServerIdentifier}/write' # write is the hardcoded name of the scope created for the ResourceServer
+          - resourceServerIdentifier: !Ref ResourceServer
+      # AnalyticsConfiguration: 
+      #   AnalyticsConfiguration
+      AuthSessionValidity: 3 # in minutes (see 'TokenValidityUnits')
+      # CallbackURLs: # use the endpoint of the customer API, so that the customer will be redirected to this endpoint after successful authentication
+      #   - String
+      ClientName: !Ref UserPoolName
+      # DefaultRedirectURI: String # use the endpoint of the customer API, so that the customer will be redirected to this endpoint after successful authentication
+      EnablePropagateAdditionalUserContextData: False
+      EnableTokenRevocation: True
+      # ExplicitAuthFlows: 
+      #   - String
+      GenerateSecret: True # must be turned into an Output?
+      IdTokenValidity: 60 # in minutes (see 'TokenValidityUnits')
+      # LogoutURLs: 
+      #   - String
+      PreventUserExistenceErrors: ENABLED
+      # ReadAttributes: 
+      #   - String
+      RefreshTokenValidity: 10 # in days (see 'TokenValidityUnits')
+      SupportedIdentityProviders: 
+        - COGNITO
+      TokenValidityUnits: 
+          AccessToken: minutes
+          IdToken: minutes
+          RefreshToken: days
+      UserPoolId: !Ref UserPool
+      # WriteAttributes: 
+      #   - String
+
+  ## It's neccessary to create a Cognito Domain, because this activates the OAuth 2.0 token endpoint
+  CognitoDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties: 
+      CustomDomainConfig: 
+        CustomDomainConfigType
+      Domain: !Ref UserPoolName
+      UserPoolId: !Ref UserPool
+
+Outputs:
+  UserPoolId:
+    Description: The ID of the Cognito User pool.
+    Value: !Ref UserPool
+  AppClientId:
+    Description: The user pool client ID.
+    Value: !Ref AppClient

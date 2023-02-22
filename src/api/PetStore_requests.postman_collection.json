@@ -1,0 +1,186 @@
+{
+	"info": {
+		"_postman_id": "253a3159-6a89-4ae7-8f6e-bf85b41c5a16",
+		"name": "PetStore_Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12770030"
+	},
+	"item": [
+		{
+			"name": "Generate Access Token",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "{{client-id}}",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "{{client-secret}}",
+							"type": "text"
+						},
+						{
+							"key": "scope",
+							"value": "https://6fft0a98v4.execute-api.eu-west-1.amazonaws.com/v1/read",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "https://{{userpool-name}}.auth.eu-west-1.amazoncognito.com/oauth2/token",
+					"protocol": "https",
+					"host": [
+						"{{userpool-name}}",
+						"auth",
+						"eu-west-1",
+						"amazoncognito",
+						"com"
+					],
+					"path": [
+						"oauth2",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get pets",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "<Insert_Access_Token_Here>",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{api-id}}.execute-api.{{region}}.amazonaws.com/{{stage-name}}/pets",
+					"protocol": "https",
+					"host": [
+						"{{api-id}}",
+						"execute-api",
+						"{{region}}",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"{{stage-name}}",
+						"pets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Post pets",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "<Insert_Access_Token_Here>",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"type\": \"cat\",\"price\": 249.99}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{api-id}}.execute-api.{{region}}.amazonaws.com/{{stage-name}}/pets",
+					"protocol": "https",
+					"host": [
+						"{{api-id}}",
+						"execute-api",
+						"{{region}}",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"{{stage-name}}",
+						"pets"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "api-id",
+			"value": "123456789",
+			"type": "string"
+		},
+		{
+			"key": "client-id",
+			"value": "123456789abcdefgh",
+			"type": "string"
+		},
+		{
+			"key": "client-secret",
+			"value": "abcdefgh123456789987654321hgfedcba",
+			"type": "string"
+		},
+		{
+			"key": "region",
+			"value": "eu-west-1",
+			"type": "string"
+		},
+		{
+			"key": "stage-name",
+			"value": "v1",
+			"type": "string"
+		},
+		{
+			"key": "userpool-name",
+			"value": "PetStoreApi",
+			"type": "string"
+		}
+	]
+}
