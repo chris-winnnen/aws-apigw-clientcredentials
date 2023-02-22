@@ -1,4 +1,4 @@
-# Securing Amazon API Gateway with Cognito Authroizer and the OAuth client-credentials flow
+# Securing Amazon API Gateway with Cognito Authorizer and the OAuth client-credentials flow
 In applications that require machine-to-machine (M2M) communications, it is common to use the Client Credentials Flow (as defined in [OAuth 2.0 RFC 6749, section 4.4](https://www.rfc-editor.org/rfc/rfc6749#section-4.4)).
 
 This guide will explain how to implement an Amazon API Gateway which uses the Client Credential Flow for auhorization by leveraging Cognito User Pool. The sequence diagram below shows the flow for accessing an API Gateway endpoint that is using a Cognito User Pool Authorizer.
